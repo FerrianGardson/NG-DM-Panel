@@ -209,12 +209,6 @@ MPA_MainPanel:SetScript("OnMouseDown", function(self, button)
         self:StartMoving()
     end
 end)
-MPA_MainPanel:SetScript("OnMouseUp", MPA_MainPanel.StopMovingOrSizing)
-MPA_MainPanel:SetScript("OnKeyDown", function(self, key)
-    if key == "ESCAPE" then
-        self:Hide()
-    end
-end)
 
 MPA_MainPanel.Texture = MPA_MainPanel:CreateTexture("ARTWORK")
 MPA_MainPanel.Texture:SetTexture("Interface\\AddOns\\DMPanelNoble\\IMG\\blank.blp")
@@ -235,7 +229,7 @@ MPA_MainPanel.CloseButton:SetAlpha(.9)
 MPA_MainPanel.CloseButton:SetPoint("CENTER", MPA_MainPanel, "CENTER", 142, 41)
 MPA_MainPanel.CloseButton:RegisterForClicks("AnyUp")
 MPA_MainPanel.CloseButton:SetScript("OnClick", function(self)
-    MPA_MainPanel:Hide()
+    DMPanelNoble:Esc()
 end)
 
 MPA_MainPanel.RefreshButton = CreateFrame("BUTTON", "MPA_MainPanel.RefreshButton", MPA_MainPanel, "DMPanelNoble:RefreshButtonTemplate");
@@ -293,13 +287,7 @@ MPA_EditPanel.EditBox:SetScript('OnEditFocusGained', function(self, elapsed)
 end)
 
 MPA_EditPanel.EditBox:SetScript('OnEscapePressed', function(self)
-print("Esc")
-MPA_MainPanel:Hide()
-if EditboxStatement == "NPCSAYSTATE" or EditboxStatement == "NPCYELLSTATE" then
-    if DMPanelNoble.db.profile.settings.NPCTalkAnimation then
-        SendChatMessage(".npcplayemote 0 1", "SAY")
-    end
-end
+    DMPanelNoble:Esc()
 end)
 
 MPA_EditPanel.EditBox:SetScript('OnEnterPressed', function(self)
@@ -318,6 +306,7 @@ elseif EditboxStatement == "NPCSAYSTATE" then
     else
         if DMPanelNoble.db.profile.settings.NPCTalkAnimation == true then
             SendChatMessage(".npcplayemote 0 1", "SAY")
+            DMPanelNoble:Esc()
         end
         if not DMPanelNoble.db.profile.settings.NPCSayByEmote then
             MessageStringSplitter(tostring(EditboxText), 1, 0, 0)
@@ -350,6 +339,7 @@ elseif EditboxStatement == "NPCYELLSTATE" then
     end
     if DMPanelNoble.db.profile.settings.NPCTalkAnimation == true then
         SendChatMessage(".npcplayemote 0 1", "SAY")
+        DMPanelNoble:Esc()
     end
 elseif EditboxStatement == "CHATCOLORSTATE" then
     if isempty(tostring(EditboxText)) then
@@ -573,11 +563,9 @@ MPA_NPCPanel.NPCSay_Button:SetScript("OnLeave",GameTooltipOnLeave);
 MPA_NPCPanel.NPCSay_Button:SetScript("OnClick", function(self)
     DMPanelNoble:EditBoxCollectGarbage();
     EditboxStatement = "NPCSAYSTATE";
-    MPA_MainPanel.Title:SetText("Отпись за НПС (мод2)")
+    MPA_MainPanel.Title:SetText("Отпись за НПС")
     DMPanelNoble:OpenMainEditbox();
-    print("1")
     if DMPanelNoble.db.profile.settings.NPCTalkAnimation == true then
-        print("2")
         SendChatMessage(".npcplayemote 1 1", "SAY")
     end
 end)
@@ -619,6 +607,9 @@ MPA_NPCPanel.NPCYell_Button:SetScript("OnClick", function(self)
     EditboxStatement = "NPCYELLSTATE";
     MPA_MainPanel.Title:SetText("Крик за НПС")
     DMPanelNoble:OpenMainEditbox();
+    if DMPanelNoble.db.profile.settings.NPCTalkAnimation == true then
+        SendChatMessage(".npcplayemote 22 1", "SAY")
+    end
 end)
 --- - - - - - - - - - - - -///- - - - - - - - - - - -///- - - - - - - - - - - -///- - - - - - - - - - - -///- - - - - - - - - - - -///- - - - - - - - - - - -
 --- - - - - - - - - - - - -///- - - - - - - - - - - -///- - - - - - - - - - - -///- - - - - - - - - - - -///- - - - - - - - - - - -///- - - - - - - - - - - -
@@ -1270,7 +1261,6 @@ SettingsFrame.RollOneShotEditBox.OneShot:SetText("OneShot")
 --[[                            Frames closer                                ]]
 --:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 function DMPanelNoble:HideAllFrames()
-    print("Hide")
 MPA_EditPanel.EditBox:SetTextColor(1, 1, 1, 1.0);
 
 MPA_NPCPanel:Hide()
@@ -1362,7 +1352,7 @@ end
 
 function DMPanelNoble:MinMapButtonFunc()
    if MPA_MainPanel:IsVisible() then
-    MPA_MainPanel:Hide()
+    DMPanelNoble:Esc()
    else
     MPA_MainPanel:Show()
    end
@@ -1429,3 +1419,12 @@ SettingsFrame.NPCTalkAnimation.label = SettingsFrame.NPCTalkAnimation:CreateFont
     "GameFontHighlight")
 SettingsFrame.NPCTalkAnimation.label:SetPoint("LEFT", SettingsFrame.NPCTalkAnimation, "RIGHT", 0, 0)
 SettingsFrame.NPCTalkAnimation.label:SetText("Анимация речи NPC")
+
+function DMPanelNoble:Esc()
+    MPA_MainPanel:Hide()
+    if EditboxStatement == "NPCSAYSTATE" or EditboxStatement == "NPCYELLSTATE" then
+        if DMPanelNoble.db.profile.settings.NPCTalkAnimation then
+            SendChatMessage(".npcplayemote 0 1", "SAY")
+        end
+    end
+end
